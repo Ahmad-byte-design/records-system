@@ -1,0 +1,45 @@
+:root {
+  color-scheme: light;
+
+  --font-display: 'Alexandria', 'Noto Kufi Arabic', 'IBM Plex Sans Arabic', 'Noto Sans Arabic', Tahoma, sans-serif;
+  --font-body: 'IBM Plex Sans Arabic', 'Noto Sans Arabic', Tahoma, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, 'DejaVu Sans Mono', monospace;
+
+  --canvas: #eef5fc;
+  --surface: #ffffff;
+  --surface-2: #f5fafe;
+  --surface-3: #eaf3fb;
+
+  --ink: #102a3f;
+  --ink-2: #294a63;
+  --muted: #516b80;
+  --faint: #557085;
+
+  --line: #dbe8f4;
+  --line-2: #c6d9ea;
+
+  --brand: #0b6cb4;
+  --brand-deep: #08538a;
+  --brand-ink: #082c49;
+  --brand-soft: #d9ecfb;
+  --brand-tint: #edf7fe;
+  --cream: #f4faff;
+
+  --clay: #b4713f;
+  --danger: #a53c31;
+  --danger-soft: #fbebe8;
+  --success: #2c765c;
+
+  --radius-xs: 6px;
+  --radius-sm: 9px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  --shadow-1: 0 1px 2px rgba(8, 44, 73, 0.06);
+  --shadow-2: 0 24px 60px -30px rgba(8, 44, 73, 0.42);
+  --ring: 0 0 0 3px rgba(11, 108, 180, 0.18);
+
+  --header-height: 72px;
+  --page-width: 1128px;
+}

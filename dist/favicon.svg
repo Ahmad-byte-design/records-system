@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="نور الشام للاتصالات">
+  <rect width="64" height="64" rx="16" fill="#082c49"/>
+  <text
+    x="32"
+    y="45"
+    text-anchor="middle"
+    font-family="Tahoma, 'Segoe UI', 'Noto Sans Arabic', sans-serif"
+    font-size="36"
+    font-weight="700"
+    fill="#f4faff"
+  >ن</text>
+  <circle cx="47" cy="17" r="3.5" fill="#63c8ff"/>
+</svg>
