@@ -60,6 +60,34 @@
 
 .table-wrap {
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .table-wrap {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-2) var(--surface-2);
+  }
+}
+
+.table-wrap::-webkit-scrollbar {
+  height: 10px;
+}
+
+.table-wrap::-webkit-scrollbar-track {
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+}
+
+.table-wrap::-webkit-scrollbar-thumb {
+  border: 2px solid var(--surface-2);
+  border-radius: var(--radius-pill);
+  background: var(--line-2);
+}
+
+.table-wrap::-webkit-scrollbar-thumb:hover {
+  background: var(--brand);
 }
 
 .users-table {

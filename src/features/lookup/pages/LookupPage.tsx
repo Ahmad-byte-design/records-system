@@ -14,7 +14,8 @@ export function LookupPage() {
 
   const matches = useMemo(() => findUsersByPhone(users, query), [users, query]);
   const user = matches[0];
-  const examplePhone = users[0]?.phone ?? '0938 938 300';
+  // Only offer the "try an example" shortcut when there is a real record to try.
+  const examplePhone = users[0]?.phone;
   const status = user
     ? `تم العثور على ${user.name}`
     : digitsOnly(query).length >= 3

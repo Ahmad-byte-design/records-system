@@ -4,7 +4,7 @@ import type { ChangeEvent } from 'react';
 type PhoneLookupCardProps = {
   query: string;
   onChange: (value: string) => void;
-  examplePhone: string;
+  examplePhone?: string;
 };
 
 export function PhoneLookupCard({ query, onChange, examplePhone }: PhoneLookupCardProps) {
@@ -49,13 +49,15 @@ export function PhoneLookupCard({ query, onChange, examplePhone }: PhoneLookupCa
 
         <div className="lookup-hints" id="phone-search-hint">
           <span>يقبل الأرقام العربية ٠–٩</span>
-          <button
-            type="button"
-            className="hint-action"
-            onClick={() => onChange(examplePhone)}
-          >
-            تجربة مثال
-          </button>
+          {examplePhone ? (
+            <button
+              type="button"
+              className="hint-action"
+              onClick={() => onChange(examplePhone)}
+            >
+              تجربة مثال
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

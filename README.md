@@ -93,7 +93,8 @@ Styles are split into design tokens (`tokens.css`), global base, shared componen
 
 ## Notes
 
-- Data lives only in the browser. Clearing site storage resets the seeded records.
+- Data lives only in the browser. A new device starts with an empty registry; clearing site storage resets it.
+- The previous release shipped seven demo rows. The store's v2 migration drops only those ids (1–7), so any records added or imported into an older install are kept.
 - Search normalizes Arabic forms and digits in both directions, so phone numbers are stored as Latin digits while accepting Arabic-Indic input.
 - The Excel writer lives in `src/lib/xlsx.ts` and the reader in `src/lib/xlsx-read.ts`; both build/parse the ZIP container and OOXML parts directly, so no spreadsheet dependency is shipped. The reader uses the browser's `DecompressionStream('deflate-raw')` for compressed entries.
 - Offline support is self-contained: the worker in `dist/sw.js` is ~100 lines of vanilla JS, with no Workbox or PWA plugin in the dependency tree. `npm run dev` is unaffected because registration is guarded by `import.meta.env.PROD`.
