@@ -1,6 +1,6 @@
 import { CheckCircle2, Copy, Fingerprint, SearchX } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
-import { digitsOnly } from '@/lib/arabic';
+import { normalizeArabic } from '@/lib/arabic';
 import { formatDate } from '@/lib/date';
 import { toast } from '@/stores/useToastStore';
 import type { User } from '@/features/users/types';
@@ -12,21 +12,21 @@ type LookupResultProps = {
   onClear: () => void;
 };
 
-async function copyValue(value: string) {
+async function copyValue(value: string, label: string) {
   try {
     await navigator.clipboard.writeText(value);
-    toast.success('تم نسخ الرقم');
+    toast.success(`تم نسخ ${label}`);
   } catch {
     toast.error('تعذّر النسخ في هذا المتصفح');
   }
 }
 
 export function LookupResult({ user, matchCount, query, onClear }: LookupResultProps) {
-  const typedDigits = digitsOnly(query).length;
+  const typedLength = normalizeArabic(query).length;
 
   if (!user) {
-    const isPartial = typedDigits > 0 && typedDigits < 3;
-    const isMissing = typedDigits >= 3;
+    const isPartial = typedLength > 0 && typedLength < 2;
+    const isMissing = typedLength >= 2;
 
     return (
       <div className="result-idle">
@@ -39,15 +39,15 @@ export function LookupResult({ user, matchCount, query, onClear }: LookupResultP
           {isMissing
             ? 'لا يوجد سجل مطابق'
             : isPartial
-              ? 'أكمل كتابة الرقم'
+              ? 'أكمل كتابة الاسم'
               : 'نتيجة البحث ستظهر هنا'}
         </h3>
         <p>
           {isMissing
-            ? 'تأكد من رقم الهاتف أو جرّب جزءاً آخر منه. يمكنك أيضاً استعراض السجل كاملاً.'
+            ? 'تأكد من الاسم أو جرّب جزءاً آخر منه. يمكنك أيضاً استعراض السجل كاملاً.'
             : isPartial
-              ? 'أدخل 3 أرقام على الأقل لبدء البحث عن المستخدم.'
-              : 'اكتب رقم الهاتف في الحقل المقابل، أو جزءاً منه، للوصول إلى بيانات المستخدم.'}
+              ? 'أدخل حرفين على الأقل لبدء البحث عن المستخدم.'
+              : 'اكتب الاسم في الحقل المقابل، أو جزءاً منه، للوصول إلى بيانات المستخدم.'}
         </p>
         {isMissing ? (
           <div className="result-idle__actions">
@@ -84,34 +84,40 @@ export function LookupResult({ user, matchCount, query, onClear }: LookupResultP
 
       <dl className="result-rows">
         <div className="result-row">
-          <dt>رقم الهاتف</dt>
+          <dt>اسم المستخدم</dt>
           <dd>
-            <span className="mono" dir="ltr">
-              {user.phone}
-            </span>
-            <button
-              type="button"
-              className="result-copy"
-              onClick={() => copyValue(user.phone)}
-              aria-label="نسخ رقم الهاتف"
-            >
-              <Copy size={13} />
-            </button>
-          </dd>
-        </div>
-        <div className="result-row">
-          <dt>رقم الهوية</dt>
-          <dd>
-            {user.identity ? (
+            {user.username ? (
               <>
                 <span className="mono" dir="ltr">
-                  {user.identity}
+                  {user.username}
                 </span>
                 <button
                   type="button"
                   className="result-copy"
-                  onClick={() => copyValue(user.identity)}
-                  aria-label="نسخ رقم الهوية"
+                  onClick={() => copyValue(user.username, 'اسم المستخدم')}
+                  aria-label="نسخ اسم المستخدم"
+                >
+                  <Copy size={13} />
+                </button>
+              </>
+            ) : (
+              <span className="mono">—</span>
+            )}
+          </dd>
+        </div>
+        <div className="result-row">
+          <dt>كلمة المرور</dt>
+          <dd>
+            {user.password ? (
+              <>
+                <span className="mono" dir="ltr">
+                  {user.password}
+                </span>
+                <button
+                  type="button"
+                  className="result-copy"
+                  onClick={() => copyValue(user.password, 'كلمة المرور')}
+                  aria-label="نسخ كلمة المرور"
                 >
                   <Copy size={13} />
                 </button>

@@ -2,24 +2,26 @@ import { useMemo, useState } from 'react';
 import { Info } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useUserStore } from '@/features/users/store/useUserStore';
-import { findUsersByPhone } from '@/features/users/utils/searchUsers';
-import { digitsOnly } from '@/lib/arabic';
+import { findUsersByName, sortNewestFirst } from '@/features/users/utils/searchUsers';
+import { normalizeArabic } from '@/lib/arabic';
 import { LookupResult } from '../components/LookupResult';
-import { PhoneLookupCard } from '../components/PhoneLookupCard';
+import { NameLookupCard } from '../components/NameLookupCard';
 import '../lookup.css';
 
 export function LookupPage() {
   const users = useUserStore((state) => state.users);
   const [query, setQuery] = useState('');
 
-  const matches = useMemo(() => findUsersByPhone(users, query), [users, query]);
+  const matches = useMemo(
+    () => sortNewestFirst(findUsersByName(users, query)),
+    [users, query],
+  );
   const user = matches[0];
-  // Only offer the "try an example" shortcut when there is a real record to try.
-  const examplePhone = users[0]?.phone;
+  const exampleName = users[0]?.name;
   const status = user
     ? `تم العثور على ${user.name}`
-    : digitsOnly(query).length >= 3
-      ? 'لا يوجد مستخدم مطابق لهذا الرقم'
+    : normalizeArabic(query).length >= 2
+      ? 'لا يوجد مستخدم مطابق لهذا الاسم'
       : '';
 
   return (
@@ -27,15 +29,15 @@ export function LookupPage() {
       <PageHeader
         eyebrow="الوصول السريع"
         title="البحث عن مستخدم"
-        description="حقل واحد يكفي: أدخل رقم الهاتف للوصول الفوري إلى سجل المستخدم وبياناته."
+        description="حقل واحد يكفي: اكتب الاسم للوصول الفوري إلى بيانات المستخدم وكلمة المرور."
       />
 
       <p className="sr-only" role="status" aria-live="polite">
         {status}
       </p>
 
-      <section className="lookup-grid" aria-label="البحث برقم الهاتف">
-        <PhoneLookupCard query={query} onChange={setQuery} examplePhone={examplePhone} />
+      <section className="lookup-grid" aria-label="البحث بالاسم">
+        <NameLookupCard query={query} onChange={setQuery} exampleName={exampleName} />
 
         <div className="panel lookup-result">
           <LookupResult
@@ -49,7 +51,7 @@ export function LookupPage() {
 
       <p className="lookup-footnote">
         <Info size={14} aria-hidden="true" />
-        البحث فوري ويطابق الأرقام العربية والإنجليزية، مع تجاهل المسافات والرموز.
+        البحث فوري ويطابق الأسماء مع تجاهل الهمزات والتشكيل واختلاف حالة الأحرف.
       </p>
     </div>
   );

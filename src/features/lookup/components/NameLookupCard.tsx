@@ -1,60 +1,54 @@
 import { Search, X } from 'lucide-react';
 import type { ChangeEvent } from 'react';
 
-type PhoneLookupCardProps = {
+type NameLookupCardProps = {
   query: string;
   onChange: (value: string) => void;
-  examplePhone?: string;
+  exampleName?: string;
 };
 
-export function PhoneLookupCard({ query, onChange, examplePhone }: PhoneLookupCardProps) {
+export function NameLookupCard({ query, onChange, exampleName }: NameLookupCardProps) {
   return (
     <div className="lookup-card">
       <span className="lookup-card__icon" aria-hidden="true">
         <Search size={22} />
       </span>
-      <h2>ابحث برقم الهاتف</h2>
+      <h2>ابحث بالاسم</h2>
       <p className="lookup-card__desc">
-        اكتب الرقم كاملاً أو جزءاً منه، وسيظهر السجل المطابق فوراً أثناء الكتابة.
+        اكتب الاسم كاملاً أو جزءاً منه، وسيظهر السجل المطابق فوراً أثناء الكتابة.
       </p>
 
       <div className="lookup-field">
-        <label htmlFor="phone-search">رقم الهاتف</label>
+        <label htmlFor="name-search">الاسم</label>
         <div className="search search--dark">
           <Search size={18} aria-hidden="true" />
           <input
-            id="phone-search"
+            id="name-search"
             className="search__input"
             type="search"
             value={query}
             onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
-            placeholder="0938 938 300"
-            dir="ltr"
-            inputMode="tel"
+            placeholder="مثال: أحمد محمد العلي"
             autoComplete="off"
-            maxLength={24}
-            aria-describedby="phone-search-hint"
+            maxLength={80}
+            aria-describedby="name-search-hint"
           />
           {query ? (
             <button
               type="button"
               className="search__clear search__clear--dark"
               onClick={() => onChange('')}
-              aria-label="مسح رقم البحث"
+              aria-label="مسح الاسم"
             >
               <X size={15} />
             </button>
           ) : null}
         </div>
 
-        <div className="lookup-hints" id="phone-search-hint">
-          <span>يقبل الأرقام العربية ٠–٩</span>
-          {examplePhone ? (
-            <button
-              type="button"
-              className="hint-action"
-              onClick={() => onChange(examplePhone)}
-            >
+        <div className="lookup-hints" id="name-search-hint">
+          <span>يقبل الحروف العربية والإنجليزية</span>
+          {exampleName ? (
+            <button type="button" className="hint-action" onClick={() => onChange(exampleName)}>
               تجربة مثال
             </button>
           ) : null}

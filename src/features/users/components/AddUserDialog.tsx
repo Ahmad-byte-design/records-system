@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
-import { digitsOnly } from '@/lib/arabic';
+import { normalizeArabic } from '@/lib/arabic';
 import { toast } from '@/stores/useToastStore';
 import { useUserStore } from '../store/useUserStore';
 import type { NewUserInput, User } from '../types';
@@ -10,39 +10,26 @@ import type { NewUserInput, User } from '../types';
 type FormValues = NewUserInput;
 type FormErrors = Partial<Record<keyof FormValues, string>>;
 
-const EMPTY_FORM: FormValues = { name: '', phone: '', identity: '' };
-
-const INVALID_PHONE = /[^\d\s+()\-٠-٩۰-۹]/;
-const INVALID_IDENTITY = /[^\d\s\-٠-٩۰-۹]/;
+const EMPTY_FORM: FormValues = { name: '', username: '', password: '' };
 
 function validate(values: FormValues, users: User[]): FormErrors {
   const errors: FormErrors = {};
   const name = values.name.trim();
-  const phone = digitsOnly(values.phone);
-  const identity = digitsOnly(values.identity);
+  const username = values.username.trim();
+  const password = values.password.trim();
 
   if (name.length < 2) {
     errors.name = 'اكتب الاسم الكامل (حرفان على الأقل).';
   }
 
-  if (INVALID_PHONE.test(values.phone)) {
-    errors.phone = 'استخدم الأرقام والرموز + - ( ) فقط.';
-  } else if (phone.length < 7) {
-    errors.phone = 'رقم الهاتف يجب أن يحتوي 7 أرقام على الأقل.';
-  } else if (phone.length > 15) {
-    errors.phone = 'رقم الهاتف أطول من المسموح.';
-  } else if (users.some((user) => digitsOnly(user.phone) === phone)) {
-    errors.phone = 'رقم الهاتف مسجّل مسبقاً.';
+  if (username.length < 2) {
+    errors.username = 'اكتب اسم المستخدم (حرفان على الأقل).';
+  } else if (users.some((user) => normalizeArabic(user.username) === normalizeArabic(username))) {
+    errors.username = 'اسم المستخدم مسجّل مسبقاً.';
   }
 
-  if (INVALID_IDENTITY.test(values.identity)) {
-    errors.identity = 'رقم الهوية يتكوّن من أرقام فقط.';
-  } else if (identity.length < 6) {
-    errors.identity = 'رقم الهوية يجب أن يحتوي 6 أرقام على الأقل.';
-  } else if (identity.length > 20) {
-    errors.identity = 'رقم الهوية أطول من المسموح.';
-  } else if (users.some((user) => digitsOnly(user.identity) === identity)) {
-    errors.identity = 'رقم الهوية مسجّل مسبقاً.';
+  if (!password) {
+    errors.password = 'اكتب كلمة المرور.';
   }
 
   return errors;
@@ -78,7 +65,7 @@ export function AddUserDialog({ onClose }: { onClose: () => void }) {
         <div>
           <p className="eyebrow">سجل جديد</p>
           <h2 id="add-user-title">إضافة مستخدم</h2>
-          <p className="modal__intro">أدخل بيانات المستخدم كما هي في وثيقة الهوية.</p>
+          <p className="modal__intro">أدخل الاسم واسم المستخدم وكلمة المرور.</p>
         </div>
         <button type="button" className="icon-btn" onClick={onClose} aria-label="إغلاق النافذة">
           <X size={18} />
@@ -92,6 +79,7 @@ export function AddUserDialog({ onClose }: { onClose: () => void }) {
           </label>
           <input
             id="add-name"
+            type="text"
             data-autofocus
             value={values.name}
             onChange={(event) => update('name', event.target.value)}
@@ -114,55 +102,57 @@ export function AddUserDialog({ onClose }: { onClose: () => void }) {
 
         <div className="field-row">
           <div className="field">
-            <label className="field__label" htmlFor="add-phone">
-              رقم الهاتف
+            <label className="field__label" htmlFor="add-username">
+              اسم المستخدم
             </label>
             <input
-              id="add-phone"
-              value={values.phone}
-              onChange={(event) => update('phone', event.target.value)}
-              placeholder="0938 938 300"
-              inputMode="tel"
+              id="add-username"
+              type="text"
+              value={values.username}
+              onChange={(event) => update('username', event.target.value)}
+              placeholder="مثال: ahmad.ali"
               dir="ltr"
               autoComplete="off"
-              maxLength={24}
-              aria-invalid={Boolean(errors.phone)}
-              aria-describedby={errors.phone ? 'add-phone-error' : 'add-phone-hint'}
+              spellCheck={false}
+              maxLength={60}
+              aria-invalid={Boolean(errors.username)}
+              aria-describedby={errors.username ? 'add-username-error' : 'add-username-hint'}
             />
-            {errors.phone ? (
-              <span className="field__error" id="add-phone-error" role="alert">
-                {errors.phone}
+            {errors.username ? (
+              <span className="field__error" id="add-username-error" role="alert">
+                {errors.username}
               </span>
             ) : (
-              <span className="field__hint" id="add-phone-hint">
-                يقبل الأرقام العربية والإنجليزية.
+              <span className="field__hint" id="add-username-hint">
+                يُستخدم للدخول إلى حساب المستخدم.
               </span>
             )}
           </div>
 
           <div className="field">
-            <label className="field__label" htmlFor="add-identity">
-              رقم الهوية
+            <label className="field__label" htmlFor="add-password">
+              كلمة المرور
             </label>
             <input
-              id="add-identity"
-              value={values.identity}
-              onChange={(event) => update('identity', event.target.value)}
-              placeholder="012931092"
-              inputMode="numeric"
+              id="add-password"
+              type="text"
+              value={values.password}
+              onChange={(event) => update('password', event.target.value)}
+              placeholder="اكتب كلمة المرور"
               dir="ltr"
               autoComplete="off"
-              maxLength={24}
-              aria-invalid={Boolean(errors.identity)}
-              aria-describedby={errors.identity ? 'add-identity-error' : 'add-identity-hint'}
+              spellCheck={false}
+              maxLength={80}
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby={errors.password ? 'add-password-error' : 'add-password-hint'}
             />
-            {errors.identity ? (
-              <span className="field__error" id="add-identity-error" role="alert">
-                {errors.identity}
+            {errors.password ? (
+              <span className="field__error" id="add-password-error" role="alert">
+                {errors.password}
               </span>
             ) : (
-              <span className="field__hint" id="add-identity-hint">
-                الرقم كما هو في الهوية.
+              <span className="field__hint" id="add-password-hint">
+                تظهر كما هي، وتُحفظ على هذا الجهاز فقط.
               </span>
             )}
           </div>

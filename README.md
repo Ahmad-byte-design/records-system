@@ -1,17 +1,18 @@
 # نور الشام للاتصالات — Arabic-first user registry
 
-سجل مستخدمين عربي كامل الواجهة: عرض السجلات، إضافة مستخدم، استيراد وتصدير Excel، وبحث عربي/رقمي.
+سجل مستخدمين عربي كامل الواجهة: عرض السجلات، إضافة مستخدم بالاسم واسم المستخدم وكلمة المرور، استيراد وتصدير Excel، والبحث بالاسم.
 
 A feature-based React 18 + Vite 6 app with Zustand persistence, a sky-blue Arabic RTL interface, dependency-free `.xlsx` reading and writing, and an installable, offline-first PWA shell.
 
 ## Features
 
-- **Users table** — id, name, phone, identity, and added date for every record, with initial avatars.
-- **Arabic-aware search** — matches names regardless of hamza/taa-marbuta/diacritics (`احمد` finds `أحمد`), and matches phone/identity fragments typed in Arabic-Indic or Latin digits.
-- **Add user dialog** — inline validation, duplicate phone/identity detection, focus trap, Escape to close, and Arabic-Indic digit normalization.
-- **Excel import** — reads `.xlsx` in the browser, recognises Arabic/English headers (`الاسم`, `رقم الهاتف`, `رقم الهوية`, …), normalizes digits, skips duplicates and invalid rows, and reports a summary.
+- **Users table** — id, name, username, password, and added date for every record, ordered newest first, with initial avatars.
+- **Arabic-aware search** — filters by name regardless of hamza/taa-marbuta/diacritics (`احمد` finds `أحمد`) and letter case.
+- **Add user dialog** — name, username and password text fields, inline validation, duplicate-username detection, focus trap, and Escape to close.
+- **Delete records** — a delete action on every row opens a confirmation popup showing the record; cancelling or pressing Escape keeps it, confirming removes it from this device immediately.
+- **Excel import** — reads `.xlsx` in the browser, recognises Arabic/English headers (`الاسم`, `اسم المستخدم`, `كلمة المرور`, …), skips duplicate usernames and invalid rows, and reports a summary.
 - **Real Excel export** — a styled `.xlsx` (frozen header, auto-filter, RTL sheet, sized columns) generated without any dependency. Export reflects the current search results.
-- **Phone lookup page** — a single phone field with live results, match count, and copy-to-clipboard actions.
+- **Name lookup page** — a single name field with live results, match count, and copy-to-clipboard actions for the username and password.
 - **Installable PWA** — web app manifest, maskable icons, and a build-generated service worker that precaches the app shell, so the registry opens and works with no network after the first visit. Chrome/Edge/Android show an in-app install button; iOS gets share-sheet guidance. Installed windows cover the notch with safe-area insets.
 - **Zustand + localStorage** — records persist under `sijil:users:v1` (key kept from the previous release so existing data survives).
 - **Responsive & accessible** — mobile navigation, keyboard focus states, skip link, live regions, reduced-motion support.
@@ -41,11 +42,11 @@ PWA installation and service workers require a secure context: `https://` in pro
 
 ## Importing a sheet
 
-The importer expects a header row containing at least a name column and a phone column; an identity column is optional. Arabic and English header names are both accepted, and a headerless sheet is read positionally as `name, phone, identity`.
+The importer expects a header row containing at least name and username columns; a password column is required for a row to be imported. Arabic and English header names are both accepted, and a headerless sheet is read positionally as `name, username, password`.
 
-- Arabic-Indic and Persian digits are converted to ASCII.
-- Phone numbers must contain 7–15 digits; identity numbers, when present, 6–20 digits.
-- Rows whose phone or identity already exists are skipped and counted.
+- Names and usernames need at least two characters; passwords cannot be empty.
+- Usernames are compared case-insensitively; rows whose username already exists are skipped and counted.
+- Sheets exported by the earlier phone/identity version are still readable: phone becomes username and identity becomes password.
 
 ## Project layout
 
@@ -68,7 +69,7 @@ src/
 │   │   ├── types.ts
 │   │   └── users.css
 │   └── lookup/
-│       ├── components/          # PhoneLookupCard, LookupResult
+│       ├── components/          # NameLookupCard, LookupResult
 │       ├── pages/LookupPage.tsx
 │       └── lookup.css
 ├── lib/
@@ -94,7 +95,9 @@ Styles are split into design tokens (`tokens.css`), global base, shared componen
 ## Notes
 
 - Data lives only in the browser. A new device starts with an empty registry; clearing site storage resets it.
-- The previous release shipped seven demo rows. The store's v2 migration drops only those ids (1–7), so any records added or imported into an older install are kept.
-- Search normalizes Arabic forms and digits in both directions, so phone numbers are stored as Latin digits while accepting Arabic-Indic input.
+- Deleting a record removes it from this browser immediately; there is no undo, so the confirmation popup shows the name and username before you commit.
+- The store migrates older browser data automatically: the v1 demo rows (ids 1–7) are dropped and phone/identity values are carried over as username/password, so records added on an earlier version survive.
+- Search normalizes Arabic forms (hamza/taa-marbuta/diacritics) and Latin letter case, so `احمد` finds `أحمد` and `AHMAD` finds `ahmad`.
+- Passwords are stored as plain text in this browser profile, because the field is deliberately a visible text input; the registry never sends them anywhere.
 - The Excel writer lives in `src/lib/xlsx.ts` and the reader in `src/lib/xlsx-read.ts`; both build/parse the ZIP container and OOXML parts directly, so no spreadsheet dependency is shipped. The reader uses the browser's `DecompressionStream('deflate-raw')` for compressed entries.
 - Offline support is self-contained: the worker in `dist/sw.js` is ~100 lines of vanilla JS, with no Workbox or PWA plugin in the dependency tree. `npm run dev` is unaffected because registration is guarded by `import.meta.env.PROD`.

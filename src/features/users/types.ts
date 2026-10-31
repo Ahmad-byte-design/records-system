@@ -1,9 +1,9 @@
 export type User = {
   id: number;
   name: string;
-  phone: string;
-  identity: string;
+  username: string;
+  password: string;
   createdAt: string;
 };
 
-export type NewUserInput = Pick<User, 'name' | 'phone' | 'identity'>;
+export type NewUserInput = Pick<User, 'name' | 'username' | 'password'>;

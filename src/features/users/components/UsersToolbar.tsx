@@ -37,9 +37,9 @@ export function UsersToolbar({ query, onChange }: UsersToolbarProps) {
         type="search"
         value={query}
         onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
-        placeholder="ابحث بالاسم أو الرقم…"
+        placeholder="ابحث بالاسم…"
         maxLength={60}
-        aria-label="البحث في المستخدمين بالاسم أو رقم الهاتف أو الهوية"
+        aria-label="البحث في المستخدمين بالاسم"
         autoComplete="off"
         spellCheck={false}
       />

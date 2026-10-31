@@ -10,10 +10,10 @@ export function exportUsers(users: User[]): void {
       columns: [
         { header: 'الرقم', width: 8, numeric: true },
         { header: 'الاسم', width: 28 },
-        { header: 'رقم الهاتف', width: 20 },
-        { header: 'رقم الهوية', width: 20 },
+        { header: 'اسم المستخدم', width: 22 },
+        { header: 'كلمة المرور', width: 22 },
       ],
-      rows: users.map((user) => [user.id, user.name, user.phone, user.identity]),
+      rows: users.map((user) => [user.id, user.name, user.username, user.password]),
     },
     `سجل-نور-الشام-${isoDay()}.xlsx`,
   );

@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/Button';
 import { readXlsx } from '@/lib/xlsx-read';
 import { toast } from '@/stores/useToastStore';
 import { AddUserDialog } from '../components/AddUserDialog';
+import { DeleteUserDialog } from '../components/DeleteUserDialog';
 import { LedgerStrip } from '../components/LedgerStrip';
 import { UsersTable } from '../components/UsersTable';
 import { UsersToolbar } from '../components/UsersToolbar';
 import { useUserStore } from '../store/useUserStore';
+import type { User } from '../types';
 import { exportUsers } from '../utils/exportUsers';
 import { buildImport } from '../utils/importUsers';
-import { searchUsers } from '../utils/searchUsers';
+import { searchUsers, sortNewestFirst } from '../utils/searchUsers';
 import '../users.css';
 
 const MAX_IMPORT_BYTES = 8 * 1024 * 1024;
@@ -25,18 +27,28 @@ function recordsLabel(count: number): string {
 export function UsersPage() {
   const users = useUserStore((state) => state.users);
   const importUsers = useUserStore((state) => state.importUsers);
+  const deleteUser = useUserStore((state) => state.deleteUser);
   const [query, setQuery] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<User | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const filtered = useMemo(() => searchUsers(users, query), [users, query]);
-  const latest = users[users.length - 1];
+  const ordered = useMemo(() => sortNewestFirst(users), [users]);
+  const filtered = useMemo(() => searchUsers(ordered, query), [ordered, query]);
+  const latest = ordered[0];
 
   const handleExport = () => {
     if (!filtered.length) return;
     exportUsers(filtered);
     toast.success(`تم تصدير ${filtered.length} سجل إلى ملف Excel`);
+  };
+
+  const handleDelete = () => {
+    if (!pendingDelete) return;
+    deleteUser(pendingDelete.id);
+    toast.success(`تم حذف ${pendingDelete.name} من السجل`);
+    setPendingDelete(null);
   };
 
   const handleImport = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +110,7 @@ export function UsersPage() {
       <PageHeader
         eyebrow="السجل العام"
         title="المستخدمون"
-        description="استعرض سجلات المستخدمين، أضف سجلاً جديداً، استورد ملف Excel، أو ابحث بالاسم ورقم الهاتف والهوية."
+        description="استعرض سجلات المستخدمين، أضف سجلاً جديداً، استورد ملف Excel، أو ابحث بالاسم."
       >
         <Button
           variant="secondary"
@@ -144,10 +156,22 @@ export function UsersPage() {
           </div>
           <UsersToolbar query={query} onChange={setQuery} />
         </div>
-        <UsersTable users={filtered} query={query} onReset={() => setQuery('')} />
+        <UsersTable
+          users={filtered}
+          query={query}
+          onReset={() => setQuery('')}
+          onDelete={setPendingDelete}
+        />
       </section>
 
       {isAdding ? <AddUserDialog onClose={() => setIsAdding(false)} /> : null}
+      {pendingDelete ? (
+        <DeleteUserDialog
+          user={pendingDelete}
+          onCancel={() => setPendingDelete(null)}
+          onConfirm={handleDelete}
+        />
+      ) : null}
     </div>
   );
 }

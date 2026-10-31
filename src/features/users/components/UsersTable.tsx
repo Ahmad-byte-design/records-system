@@ -1,4 +1,4 @@
-import { SearchX, UsersRound } from 'lucide-react';
+import { SearchX, Trash2, UsersRound } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { HighlightedText } from '@/components/ui/HighlightedText';
 import { formatDate } from '@/lib/date';
@@ -8,9 +8,10 @@ type UsersTableProps = {
   users: User[];
   query: string;
   onReset: () => void;
+  onDelete: (user: User) => void;
 };
 
-export function UsersTable({ users, query, onReset }: UsersTableProps) {
+export function UsersTable({ users, query, onReset, onDelete }: UsersTableProps) {
   if (!users.length) {
     return (
       <div className="table-empty">
@@ -20,7 +21,7 @@ export function UsersTable({ users, query, onReset }: UsersTableProps) {
         <h3>{query ? 'لا توجد نتائج مطابقة' : 'لا توجد سجلات بعد'}</h3>
         <p>
           {query
-            ? 'جرّب اسماً آخر، أو جزءاً من رقم الهاتف أو رقم الهوية.'
+            ? 'جرّب اسماً آخر أو تهجئة مختلفة.'
             : 'أضف أول مستخدم ليظهر هنا.'}
         </p>
         {query ? (
@@ -36,7 +37,7 @@ export function UsersTable({ users, query, onReset }: UsersTableProps) {
     <div className="table-wrap">
       <table className="users-table">
         <caption className="sr-only">
-          سجل المستخدمين: الرقم، الاسم، رقم الهاتف، رقم الهوية
+          سجل المستخدمين: الرقم، الاسم، اسم المستخدم، كلمة المرور، إجراءات
         </caption>
         <thead>
           <tr>
@@ -44,8 +45,11 @@ export function UsersTable({ users, query, onReset }: UsersTableProps) {
               الرقم
             </th>
             <th scope="col">الاسم</th>
-            <th scope="col">رقم الهاتف</th>
-            <th scope="col">رقم الهوية</th>
+            <th scope="col">اسم المستخدم</th>
+            <th scope="col">كلمة المرور</th>
+            <th scope="col" className="cell-actions">
+              إجراءات
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -65,19 +69,22 @@ export function UsersTable({ users, query, onReset }: UsersTableProps) {
                   </div>
                 </div>
               </td>
-              <td className="cell-numeric">
-                <span dir="ltr">
-                  <HighlightedText text={user.phone} query={query} />
-                </span>
+              <td className="cell-credential">
+                <span dir="ltr">{user.username || '—'}</span>
               </td>
-              <td className="cell-numeric">
-                <span dir="ltr">
-                  {user.identity ? (
-                    <HighlightedText text={user.identity} query={query} />
-                  ) : (
-                    '—'
-                  )}
-                </span>
+              <td className="cell-credential">
+                <span dir="ltr">{user.password || '—'}</span>
+              </td>
+              <td className="cell-actions">
+                <button
+                  type="button"
+                  className="row-delete"
+                  onClick={() => onDelete(user)}
+                  aria-label={`حذف ${user.name}`}
+                  title="حذف السجل"
+                >
+                  <Trash2 size={15} aria-hidden="true" />
+                </button>
               </td>
             </tr>
           ))}
