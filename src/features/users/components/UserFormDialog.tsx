@@ -1,71 +1,74 @@
 import { useState, type FormEvent } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
-import { normalizeArabic } from '@/lib/arabic';
 import { toast } from '@/stores/useToastStore';
 import { useUserStore } from '../store/useUserStore';
 import type { NewUserInput, User } from '../types';
+import { validateUserInput, type UserFormErrors } from '../utils/validateUserInput';
 
-type FormValues = NewUserInput;
-type FormErrors = Partial<Record<keyof FormValues, string>>;
+type UserFormDialogProps = {
+  /** When present the dialog edits this record; otherwise it adds a new one. */
+  user?: User;
+  onClose: () => void;
+};
 
-const EMPTY_FORM: FormValues = { name: '', username: '', password: '' };
+const EMPTY_FORM: NewUserInput = { name: '', username: '', password: '' };
 
-function validate(values: FormValues, users: User[]): FormErrors {
-  const errors: FormErrors = {};
-  const name = values.name.trim();
-  const username = values.username.trim();
-  const password = values.password.trim();
-
-  if (name.length < 2) {
-    errors.name = 'اكتب الاسم الكامل (حرفان على الأقل).';
-  }
-
-  if (username.length < 2) {
-    errors.username = 'اكتب اسم المستخدم (حرفان على الأقل).';
-  } else if (users.some((user) => normalizeArabic(user.username) === normalizeArabic(username))) {
-    errors.username = 'اسم المستخدم مسجّل مسبقاً.';
-  }
-
-  if (!password) {
-    errors.password = 'اكتب كلمة المرور.';
-  }
-
-  return errors;
-}
-
-export function AddUserDialog({ onClose }: { onClose: () => void }) {
+/** Shared add/edit dialog with the same fields and validation in both modes. */
+export function UserFormDialog({ user, onClose }: UserFormDialogProps) {
   const users = useUserStore((state) => state.users);
   const addUser = useUserStore((state) => state.addUser);
-  const [values, setValues] = useState<FormValues>(EMPTY_FORM);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const updateUser = useUserStore((state) => state.updateUser);
+  const isEdit = Boolean(user);
+  const titleId = isEdit ? 'edit-user-title' : 'add-user-title';
 
-  const update = (field: keyof FormValues, value: string) => {
+  const [values, setValues] = useState<NewUserInput>(() =>
+    user
+      ? { name: user.name, username: user.username, password: user.password }
+      : EMPTY_FORM,
+  );
+  const [errors, setErrors] = useState<UserFormErrors>({});
+
+  const update = (field: keyof NewUserInput, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
     setErrors((current) => (current[field] ? { ...current, [field]: undefined } : current));
   };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const nextErrors = validate(values, users);
+    const nextErrors = validateUserInput(values, users, user?.id);
     if (Object.values(nextErrors).some(Boolean)) {
       setErrors(nextErrors);
       return;
     }
 
-    const user = addUser(values);
-    toast.success(`تمت إضافة ${user.name} إلى السجل`);
+    if (user) {
+      const updated = updateUser(user.id, values);
+      if (!updated) {
+        toast.error('تعذّر تحديث السجل. حاول مرة أخرى.');
+        return;
+      }
+      toast.success(`تم تحديث ${updated.name}`);
+    } else {
+      const created = addUser(values);
+      toast.success(`تمت إضافة ${created.name} إلى السجل`);
+    }
+
     onClose();
   };
 
   return (
-    <Modal titleId="add-user-title" onClose={onClose}>
+    <Modal titleId={titleId} onClose={onClose}>
       <div className="modal__head">
         <div>
-          <p className="eyebrow">سجل جديد</p>
-          <h2 id="add-user-title">إضافة مستخدم</h2>
-          <p className="modal__intro">أدخل الاسم واسم المستخدم وكلمة المرور.</p>
+          <p className="eyebrow">{isEdit ? 'تحديث السجل' : 'سجل جديد'}</p>
+          <h2 id={titleId}>{isEdit ? 'تعديل المستخدم' : 'إضافة مستخدم'}</h2>
+          <p className="modal__intro">
+            {isEdit
+              ? 'عدّل الاسم أو بيانات الدخول ثم احفظ التعديلات.'
+              : 'أدخل الاسم واسم المستخدم وكلمة المرور.'}
+          </p>
         </div>
         <button type="button" className="icon-btn" onClick={onClose} aria-label="إغلاق النافذة">
           <X size={18} />
@@ -159,8 +162,12 @@ export function AddUserDialog({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="modal__actions">
-          <Button type="submit" variant="primary" icon={<Plus size={17} />}>
-            حفظ المستخدم
+          <Button
+            type="submit"
+            variant="primary"
+            icon={isEdit ? <Save size={16} /> : <Plus size={17} />}
+          >
+            {isEdit ? 'حفظ التعديلات' : 'حفظ المستخدم'}
           </Button>
           <Button variant="ghost" onClick={onClose}>
             إلغاء

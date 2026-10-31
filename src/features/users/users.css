@@ -93,7 +93,7 @@
 
 .users-table {
   width: 100%;
-  min-width: 760px;
+  min-width: 800px;
   border-collapse: collapse;
   text-align: start;
 }
@@ -180,10 +180,17 @@
 }
 
 .users-table .cell-actions {
-  width: 64px;
+  width: 112px;
   text-align: center;
 }
 
+.cell-actions__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.row-edit,
 .row-delete {
   width: 30px;
   height: 30px;
@@ -201,10 +208,23 @@
     color 0.15s ease;
 }
 
+.row-edit:hover {
+  border-color: var(--brand-soft);
+  background: var(--brand-tint);
+  color: var(--brand);
+}
+
 .row-delete:hover {
   border-color: #f0cfc9;
   background: var(--danger-soft);
   color: var(--danger);
+}
+
+.row-edit:focus-visible {
+  outline: 0;
+  border-color: var(--brand);
+  box-shadow: var(--ring);
+  color: var(--brand);
 }
 
 .row-delete:focus-visible {

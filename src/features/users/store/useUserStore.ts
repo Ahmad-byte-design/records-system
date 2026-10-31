@@ -6,6 +6,7 @@ type UserState = {
   users: User[];
   addUser: (input: NewUserInput) => User;
   importUsers: (inputs: NewUserInput[]) => User[];
+  updateUser: (id: number, input: NewUserInput) => User | undefined;
   deleteUser: (id: number) => void;
 };
 
@@ -72,6 +73,20 @@ export const useUserStore = create<UserState>()(
         });
         set({ users: [...users, ...created] });
         return created;
+      },
+      updateUser: (id, input) => {
+        const users = get().users;
+        const current = users.find((user) => user.id === id);
+        if (!current) return undefined;
+
+        const updated: User = {
+          ...current,
+          name: input.name.trim(),
+          username: input.username.trim(),
+          password: input.password.trim(),
+        };
+        set({ users: users.map((user) => (user.id === id ? updated : user)) });
+        return updated;
       },
       deleteUser: (id) => {
         set({ users: get().users.filter((user) => user.id !== id) });

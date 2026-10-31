@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { readXlsx } from '@/lib/xlsx-read';
 import { toast } from '@/stores/useToastStore';
-import { AddUserDialog } from '../components/AddUserDialog';
+import { UserFormDialog } from '../components/UserFormDialog';
 import { DeleteUserDialog } from '../components/DeleteUserDialog';
 import { LedgerStrip } from '../components/LedgerStrip';
 import { UsersTable } from '../components/UsersTable';
@@ -30,6 +30,7 @@ export function UsersPage() {
   const deleteUser = useUserStore((state) => state.deleteUser);
   const [query, setQuery] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [pendingEdit, setPendingEdit] = useState<User | null>(null);
   const [pendingDelete, setPendingDelete] = useState<User | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -160,11 +161,15 @@ export function UsersPage() {
           users={filtered}
           query={query}
           onReset={() => setQuery('')}
+          onEdit={setPendingEdit}
           onDelete={setPendingDelete}
         />
       </section>
 
-      {isAdding ? <AddUserDialog onClose={() => setIsAdding(false)} /> : null}
+      {isAdding ? <UserFormDialog onClose={() => setIsAdding(false)} /> : null}
+      {pendingEdit ? (
+        <UserFormDialog user={pendingEdit} onClose={() => setPendingEdit(null)} />
+      ) : null}
       {pendingDelete ? (
         <DeleteUserDialog
           user={pendingDelete}

@@ -1,4 +1,4 @@
-import { SearchX, Trash2, UsersRound } from 'lucide-react';
+import { Pencil, SearchX, Trash2, UsersRound } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { HighlightedText } from '@/components/ui/HighlightedText';
 import { formatDate } from '@/lib/date';
@@ -8,10 +8,11 @@ type UsersTableProps = {
   users: User[];
   query: string;
   onReset: () => void;
+  onEdit: (user: User) => void;
   onDelete: (user: User) => void;
 };
 
-export function UsersTable({ users, query, onReset, onDelete }: UsersTableProps) {
+export function UsersTable({ users, query, onReset, onEdit, onDelete }: UsersTableProps) {
   if (!users.length) {
     return (
       <div className="table-empty">
@@ -76,15 +77,26 @@ export function UsersTable({ users, query, onReset, onDelete }: UsersTableProps)
                 <span dir="ltr">{user.password || '—'}</span>
               </td>
               <td className="cell-actions">
-                <button
-                  type="button"
-                  className="row-delete"
-                  onClick={() => onDelete(user)}
-                  aria-label={`حذف ${user.name}`}
-                  title="حذف السجل"
-                >
-                  <Trash2 size={15} aria-hidden="true" />
-                </button>
+                <div className="cell-actions__group">
+                  <button
+                    type="button"
+                    className="row-edit"
+                    onClick={() => onEdit(user)}
+                    aria-label={`تعديل ${user.name}`}
+                    title="تعديل السجل"
+                  >
+                    <Pencil size={14} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className="row-delete"
+                    onClick={() => onDelete(user)}
+                    aria-label={`حذف ${user.name}`}
+                    title="حذف السجل"
+                  >
+                    <Trash2 size={15} aria-hidden="true" />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

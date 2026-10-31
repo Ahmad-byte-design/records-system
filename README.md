@@ -8,7 +8,7 @@ A feature-based React 18 + Vite 6 app with Zustand persistence, a sky-blue Arabi
 
 - **Users table** — id, name, username, password, and added date for every record, ordered newest first, with initial avatars.
 - **Arabic-aware search** — filters by name regardless of hamza/taa-marbuta/diacritics (`احمد` finds `أحمد`) and letter case.
-- **Add user dialog** — name, username and password text fields, inline validation, duplicate-username detection, focus trap, and Escape to close.
+- **Add/edit user dialog** — the same name, username and password text fields open blank for a new record or pre-filled for an existing one, with inline validation, duplicate-username detection, focus trap, and Escape to close.
 - **Delete records** — a delete action on every row opens a confirmation popup showing the record; cancelling or pressing Escape keeps it, confirming removes it from this device immediately.
 - **Excel import** — reads `.xlsx` in the browser, recognises Arabic/English headers (`الاسم`, `اسم المستخدم`, `كلمة المرور`, …), skips duplicate usernames and invalid rows, and reports a summary.
 - **Real Excel export** — a styled `.xlsx` (frozen header, auto-filter, RTL sheet, sized columns) generated without any dependency. Export reflects the current search results.
@@ -62,7 +62,7 @@ src/
 │   └── ui/                      # Button, Modal, Avatar, Toaster, HighlightedText
 ├── features/
 │   ├── users/
-│   │   ├── components/          # UsersToolbar, UsersTable, AddUserDialog, LedgerStrip
+│   │   ├── components/          # UsersToolbar, UsersTable, UserFormDialog, DeleteUserDialog, LedgerStrip
 │   │   ├── pages/UsersPage.tsx
 │   │   ├── store/useUserStore.ts
 │   │   ├── utils/               # searchUsers, exportUsers, importUsers
@@ -95,6 +95,7 @@ Styles are split into design tokens (`tokens.css`), global base, shared componen
 ## Notes
 
 - Data lives only in the browser. A new device starts with an empty registry; clearing site storage resets it.
+- Editing keeps the record's original creation time and position in the newest-first list; changes are saved immediately.
 - Deleting a record removes it from this browser immediately; there is no undo, so the confirmation popup shows the name and username before you commit.
 - The store migrates older browser data automatically: the v1 demo rows (ids 1–7) are dropped and phone/identity values are carried over as username/password, so records added on an earlier version survive.
 - Search normalizes Arabic forms (hamza/taa-marbuta/diacritics) and Latin letter case, so `احمد` finds `أحمد` and `AHMAD` finds `ahmad`.
